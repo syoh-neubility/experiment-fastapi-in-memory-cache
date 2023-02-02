@@ -43,7 +43,7 @@ async def get_count():
 
 async def update_count(value: int):
     print("update_count called with: ", value)
-    return await in_memory_storage.set("count", value, 1)
+    return await in_memory_storage.set("count", value, 100)
 
 
 @app.put("/counts/increment/in-memory-cache")
