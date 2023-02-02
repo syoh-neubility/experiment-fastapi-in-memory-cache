@@ -3,6 +3,7 @@ from fastapi import FastAPI
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.decorator import cache
 
 app = FastAPI()
 
@@ -13,6 +14,7 @@ async def root():
 
 
 in_memory_dict = {}
+
 
 async def get_value_from_in_memory(key: str):
     global in_memory_dict
@@ -36,13 +38,19 @@ async def increment_count_global_variable():
     return next_val
 
 
-
 async def get_count():
     return await FastAPICache.get_backend().get("count")
+
 
 async def update_count(value: int):
     print("update_count called with: ", value)
     return await FastAPICache.get_backend().set("count", value, 100)
+
+
+@cache(expire=1)
+async def expensive_calc():
+    print("expensive_calc called")
+    return 1 + 1
 
 
 @app.put("/counts/increment/in-memory-cache")
@@ -53,7 +61,7 @@ async def increment_count_in_memory_cache():
     await update_count(next_value)
     value = await get_count()
     print(value)
-    return next_value
+    return {"value": next_value, "expensive_calc": await expensive_calc()}
 
 
 @app.on_event("startup")
